@@ -84,9 +84,13 @@ public class Server implements Closeable {
             output = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
             System.out.println("Responding a request from socket " + client.getPort());
 
-            socketCallback.accept(input, output);
+            var shouldBeTerminated = socketCallback.call(input, output);
 
             output.flush();
+
+            if(shouldBeTerminated) {
+                this.close();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -111,9 +115,13 @@ public class Server implements Closeable {
         return this.running;
     }
 
-    // same as BiConsumer, just can throw IOException
+    // same as BiFunction, just can throw IOException
     @FunctionalInterface
-    public static interface SocketCallback {
-        void accept(BufferedReader input, BufferedWriter output) throws IOException;
+    public interface SocketCallback {
+
+        /**
+         * @return whether server should be terminated
+         */
+        boolean call(BufferedReader input, BufferedWriter output) throws IOException;
     }
 }

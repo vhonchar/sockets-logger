@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +37,7 @@ class ServerTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            return false;
         });
 
         // start 3 sockets
@@ -54,11 +56,24 @@ class ServerTest {
         this.server.start(ANY_OPEN_PORT, (input, output) -> {
             var receivedText = input.readLine();
             output.write("Server received " + receivedText);
+            return false;
         });
 
         var actualResponse = Client.sendRequest(this.server.getPort(), "request text").get();
 
         assertEquals("Server received request text", actualResponse);
+    }
+
+    @Test
+    void shouldTerminateIfAnyControllerRequiresSo() throws IOException, ExecutionException, InterruptedException {
+        AtomicInteger clientsCounter = new AtomicInteger();
+        this.server.start(ANY_OPEN_PORT, (input, output) -> clientsCounter.incrementAndGet() != 1);
+
+        Client.ping(this.server.getPort()).get();
+        assertTrue(this.server.isRunning(), "Server should be destroyed only on the second client");
+
+        Client.ping(this.server.getPort()).get();
+        assertFalse(this.server.isRunning(), "Server should be destroyed");
     }
 
     @AfterEach
