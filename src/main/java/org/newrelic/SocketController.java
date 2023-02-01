@@ -1,0 +1,27 @@
+package org.newrelic;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+public class SocketController implements Server.SocketCallback {
+
+    private final Storage storage;
+
+    public SocketController(Storage storage) {
+        this.storage = storage;
+    }
+
+    @Override
+    public boolean call(BufferedReader input, BufferedWriter output) throws IOException {
+        while (true) {
+            var data = input.readLine();
+            if (data.equalsIgnoreCase("terminate")) {
+                return true;
+            }
+            if (data.matches("[0-9]{9}")) {
+                storage.add(data);
+            }
+        }
+    }
+}

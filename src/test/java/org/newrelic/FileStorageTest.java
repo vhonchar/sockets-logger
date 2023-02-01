@@ -14,9 +14,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class StorageTest {
+class FileStorageTest {
 
-    private Storage storage;
+    private FileStorage storage;
     private MetricsService metrics;
 
     @TempDir
@@ -27,7 +27,7 @@ class StorageTest {
     public void setup() throws IOException {
         this.metrics = new MetricsService();
         persistedStorage = new File(tempDir, "numbers.txt");
-        this.storage = new Storage(persistedStorage, this.metrics);
+        this.storage = new FileStorage(persistedStorage, this.metrics);
     }
 
     @Test
@@ -84,7 +84,7 @@ class StorageTest {
         this.storage.shutdown();
 
         // re-create and write new data
-        this.storage = new Storage(persistedStorage, metrics);
+        this.storage = new FileStorage(persistedStorage, metrics);
         this.storage.add("2");
         this.storage.shutdown();
 
