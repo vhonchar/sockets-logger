@@ -37,17 +37,15 @@ public class Server implements Closeable {
     /**
      * Start accepting incoming requests in a separated thread,
      * so we could stop the server from this thread.
-     * <p>
-     * This method will block current thread until server socket is started;
      */
     public void start(int port, SocketCallback socketCallback) throws IOException {
         this.serverSocket = new ServerSocket(port);
+        this.running = true;
         System.out.println("Started server on port " + this.serverSocket.getLocalPort());
-        new Thread(() -> this.acceptNewSocketRequests(port, socketCallback)).start();
+        new Thread(() -> this.acceptNewSocketRequests(socketCallback)).start();
     }
 
-    private void acceptNewSocketRequests(int port, SocketCallback socketCallback) {
-        this.running = true;
+    private void acceptNewSocketRequests(SocketCallback socketCallback) {
         while (this.running) {
             try {
                 var client = this.serverSocket.accept();
@@ -63,7 +61,6 @@ public class Server implements Closeable {
             }
         }
         System.out.println("Server is shutting down");
-        this.executor.shutdown();
     }
 
     private void reject(Socket client) {
@@ -108,6 +105,10 @@ public class Server implements Closeable {
 
     public int getPort() {
         return this.serverSocket.getLocalPort();
+    }
+
+    public boolean isRunning() {
+        return this.running;
     }
 
     // same as BiConsumer, just can throw IOException
