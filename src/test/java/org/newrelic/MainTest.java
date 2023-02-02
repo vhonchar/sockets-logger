@@ -1,10 +1,12 @@
 package org.newrelic;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +43,7 @@ class MainTest {
         // Need to give time for server to remove completed handlers from the thread pool
         // otherwise, it will reject a new connection
         TimeUnit.SECONDS.sleep(2);
-        Client.sendRequest(4000, "terminate");
+        TestHelpers.sendRequest(4000, "terminate");
         serverFeature.get();
 
         try (var stream = Files.lines(Path.of("numbers.txt"))) {
@@ -63,7 +65,7 @@ class MainTest {
     }
 
     @AfterEach
-    public void tearDown() {
-//        FileUtils.deleteQuietly(new File("numbers.txt"));
+    public void tearDown() throws IOException {
+        FileUtils.delete(new File("numbers.txt"));
     }
 }

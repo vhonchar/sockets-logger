@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.concurrent.CompletableFuture;
 
-public class Client {
+public class TestHelpers {
 
     public static CompletableFuture<String> ping(int port) {
         return CompletableFuture.supplyAsync(() -> {
@@ -26,7 +26,7 @@ public class Client {
         return CompletableFuture.supplyAsync(() -> {
             try (var socket = new Socket("localhost", port);
                  var input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                 var output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                 var output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))
             ) {
                 output.write(text + System.lineSeparator());
                 output.flush();

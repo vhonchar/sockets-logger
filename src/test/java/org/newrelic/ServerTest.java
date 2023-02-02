@@ -43,14 +43,14 @@ class ServerTest {
         });
 
         // start 3 sockets
-        Client.ping(this.server.getPort());
-        Client.ping(this.server.getPort());
-        Client.ping(this.server.getPort());
+        TestHelpers.ping(this.server.getPort());
+        TestHelpers.ping(this.server.getPort());
+        TestHelpers.ping(this.server.getPort());
         // await until all three sockets reach to the server
         receivedSockets.await();
 
         // try to connect one more time, expect error
-        assertEquals("Too many clients", Client.ping(this.server.getPort()).get());
+        assertEquals("Too many clients", TestHelpers.ping(this.server.getPort()).get());
     }
 
     @Test
@@ -61,7 +61,7 @@ class ServerTest {
             return false;
         });
 
-        var actualResponse = Client.sendRequest(this.server.getPort(), "request text").get();
+        var actualResponse = TestHelpers.sendRequest(this.server.getPort(), "request text").get();
 
         assertEquals("Server received request text", actualResponse);
     }
@@ -71,10 +71,10 @@ class ServerTest {
         AtomicInteger clientsCounter = new AtomicInteger();
         this.server.start(ANY_OPEN_PORT, (input, output) -> clientsCounter.incrementAndGet() != 1);
 
-        Client.ping(this.server.getPort()).get();
+        TestHelpers.ping(this.server.getPort()).get();
         assertTrue(this.server.isRunning(), "Server should be destroyed only on the second client");
 
-        Client.ping(this.server.getPort()).get();
+        TestHelpers.ping(this.server.getPort()).get();
         assertFalse(this.server.isRunning(), "Server should be destroyed");
     }
 
