@@ -4,6 +4,8 @@ plugins {
 
 group 'org.newrelic'
 version '1.0-SNAPSHOT'
+sourceCompatibility = 12
+targetCompatibility = 12
 
 repositories {
     mavenCentral()
@@ -19,4 +21,19 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+task runServer(type: JavaExec) {
+    group = "Execution"
+    description = "Run Socket Server on port 4000"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "org.newrelic.Main"
+}
+
+task runClient(type: JavaExec) {
+    group = "Execution"
+    description = "Run Client Socket to port 4000"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "org.newrelic.ClientApp"
+    standardInput = System.in
 }
