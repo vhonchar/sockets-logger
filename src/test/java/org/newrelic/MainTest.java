@@ -23,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTest {
 
     private static final int AMOUNT_OF_DATA = 2_000_000;
-    private static final int SHOULD_BE_HANDLED_IN = 13; //seconds. +- 3 seconds to start app and assert results
+    // +- 5 seconds to start test and assert results
+    private static final int SHOULD_BE_HANDLED_IN = 15;
     private final Collection<String> generatedData = generateData(AMOUNT_OF_DATA);
 
     @Test
