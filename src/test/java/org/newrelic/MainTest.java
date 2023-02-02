@@ -18,13 +18,14 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// basically, integration test
-@Timeout(60)
 class MainTest {
 
-    private static final int AMOUNT_OF_DATA = 3_000_000;
+    private static final int AMOUNT_OF_DATA = 2_000_000;
+    private static final int SHOULD_BE_HANDLED_IN = 13; //seconds. +- 3 seconds to start app and assert results
+    private final Collection<String> generatedData = generateData(AMOUNT_OF_DATA);
 
     @Test
+    @Timeout(SHOULD_BE_HANDLED_IN)
     void shouldSupportHighThroughput() throws InterruptedException, ExecutionException, IOException {
         var serverFeature = CompletableFuture.runAsync(() -> {
             try {
@@ -35,18 +36,19 @@ class MainTest {
         });
 
         var loadGenerator = new LoadGenerator();
-        var data = generateData(AMOUNT_OF_DATA);
-        loadGenerator.generateLoad(data.stream(), 5, 4000);
+        loadGenerator.generateLoad(generatedData.stream(), 5, 4000);
 
         // Need to give time for server to remove completed handlers from the thread pool
-        TimeUnit.SECONDS.sleep(5);
+        // otherwise, it will reject a new connection
+        TimeUnit.SECONDS.sleep(2);
         Client.sendRequest(4000, "terminate");
         serverFeature.get();
 
-        assertEquals(
-                data.stream().distinct().count(),
-                Files.lines(Path.of("numbers.txt")).count()
-        );
+        try (var stream = Files.lines(Path.of("numbers.txt"))) {
+            var expected = generatedData.stream().distinct().count();
+            var actual = stream.count();
+            assertEquals(expected, actual);
+        }
     }
 
     private Collection<String> generateData(int amountOfData) {
