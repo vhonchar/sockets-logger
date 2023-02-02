@@ -11,6 +11,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Stores all unique data in-memory for quick access.
+ * In-memory storage is a set of integers (for little memory optimization),
+ * while persisted file stores initial incoming data, to preserve leading 0s
+ * <p>
+ * Disk IO operations are deferred to another thread, to ensure high throughput of the main operation.
+ * Note, this leads to a necessity to wait for the deferred write queue to complete before shutting down the app.
+ */
 public class FileStorage implements Storage {
 
     // since we are going to store only numbers with max 9 digits,

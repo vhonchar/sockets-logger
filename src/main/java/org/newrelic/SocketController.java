@@ -16,8 +16,7 @@ public class SocketController implements Server.SocketCallback {
     public boolean call(BufferedReader input, BufferedWriter output) throws IOException {
         while (true) {
             var data = input.readLine();
-            // null is returned when input stream is closed
-            // means, client socket just disconnected
+            // null is returned when input stream or socket is closed
             if (data == null) {
                 return false;
             }
