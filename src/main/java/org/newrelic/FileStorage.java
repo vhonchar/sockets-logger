@@ -22,8 +22,8 @@ public class FileStorage implements Storage {
 
     public FileStorage(File file, MetricsService metrics) throws IOException {
         this.metrics = metrics;
-        if (file.exists()) {
-            file.delete();
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException("Can't delete file " + file.getPath());
         }
         file.createNewFile();
         boolean append = true;
