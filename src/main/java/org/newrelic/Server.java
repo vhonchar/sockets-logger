@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class Server implements Closeable {
 
     // break connection with client socket if no data is supplied within configured time
-    private static final int SOCKET_READ_TIMEOUT = 5000;
+    private static final int SOCKET_READ_TIMEOUT = 60 * 1000;
     private final ThreadPoolExecutor executor;
     private ServerSocket serverSocket;
     private volatile boolean running;
@@ -93,7 +93,8 @@ public class Server implements Closeable {
             output.flush();
 
             if (shouldBeTerminated) {
-                this.close();
+                this.running = false;
+                this.serverSocket.close();
             }
         } catch (IOException | RuntimeException e) {
             e.printStackTrace();
@@ -108,8 +109,16 @@ public class Server implements Closeable {
     @Override
     public void close() throws IOException {
         this.running = false;
-        this.executor.shutdown();
         this.serverSocket.close();
+
+        try {
+            this.executor.shutdown();
+            System.out.println("Waiting for completion of all controllers");
+            var terminated = this.executor.awaitTermination(10, TimeUnit.SECONDS);
+            System.out.println("Managed to await all in-progress controllers: " + terminated);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getPort() {
