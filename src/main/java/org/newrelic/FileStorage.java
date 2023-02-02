@@ -59,6 +59,7 @@ public class FileStorage implements Storage {
             this.os.flush();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
+        } finally {
             IOUtils.closeQuietly(this.os);
         }
     }

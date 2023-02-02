@@ -1,31 +1,30 @@
 package org.newrelic;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FileStorageTest {
-
     private FileStorage storage;
     private MetricsService metrics;
-
-    @TempDir
     private File tempDir;
     private File persistedStorage;
 
     @BeforeEach
     public void setup() throws IOException {
         this.metrics = new MetricsService();
+        tempDir = Files.createTempDirectory(null).toFile();
         persistedStorage = new File(tempDir, "numbers.txt");
         this.storage = new FileStorage(persistedStorage, this.metrics);
     }
@@ -95,7 +94,8 @@ class FileStorageTest {
     }
 
     @AfterEach
-    public void teardown() throws InterruptedException {
+    public void teardown() throws IOException {
         this.storage.shutdown();
+        FileUtils.deleteDirectory(tempDir);
     }
 }
