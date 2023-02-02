@@ -1,10 +1,12 @@
 package org.newrelic;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -13,18 +15,19 @@ public class FileStorage implements Storage {
 
     // since we are going to store only numbers with max 9 digits,
     // this will reduce memory consumption a little
-    private final Set<Integer> storage = new HashSet<>();
+    private final Set<Integer> storage = ConcurrentHashMap.newKeySet();
     private final ExecutorService persistQueue = Executors.newSingleThreadExecutor();
-    private final File file;
     private final MetricsService metrics;
+    private final FileWriter os;
 
     public FileStorage(File file, MetricsService metrics) throws IOException {
         this.metrics = metrics;
-        this.file = file;
         if (file.exists()) {
             file.delete();
         }
         file.createNewFile();
+        boolean append = true;
+        this.os = new FileWriter(file, append);
     }
 
     public void add(String number) {
@@ -41,17 +44,22 @@ public class FileStorage implements Storage {
     }
 
     private void persist(String number) {
-        boolean append = true;
-        try (var os = new FileWriter(this.file, append)) {
-            os.write(number + System.lineSeparator());
+        try {
+            this.os.write(number + System.lineSeparator());
         } catch (IOException e) {
             System.out.println("Error while trying to persist number " + number);
             e.printStackTrace();
         }
     }
 
-    public void shutdown() throws InterruptedException {
+    public void shutdown() {
         this.persistQueue.shutdown();
-        this.persistQueue.awaitTermination(10, TimeUnit.SECONDS);
+        try {
+            this.persistQueue.awaitTermination(10, TimeUnit.SECONDS);
+            this.os.flush();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+            IOUtils.closeQuietly(this.os);
+        }
     }
 }

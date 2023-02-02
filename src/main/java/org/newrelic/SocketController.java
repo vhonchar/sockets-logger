@@ -16,7 +16,13 @@ public class SocketController implements Server.SocketCallback {
     public boolean call(BufferedReader input, BufferedWriter output) throws IOException {
         while (true) {
             var data = input.readLine();
-            if (data.equalsIgnoreCase("terminate")) {
+            // null is returned when input stream is closed
+            // means, client socket just disconnected
+            if (data == null) {
+                return false;
+            }
+            if ("terminate".equalsIgnoreCase(data)) {
+                System.out.println("Received command " + data);
                 return true;
             }
             if (data.matches("[0-9]{9}")) {
