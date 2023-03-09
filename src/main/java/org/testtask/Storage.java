@@ -1,4 +1,4 @@
-package org.newrelic;
+package org.testtask;
 
 public interface Storage {
 

@@ -1,4 +1,4 @@
-package org.newrelic;
+package org.testtask;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

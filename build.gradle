@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'org.newrelic'
+group 'org.testtask'
 version '1.0-SNAPSHOT'
 sourceCompatibility = 12
 targetCompatibility = 12
@@ -27,13 +27,13 @@ task runServer(type: JavaExec) {
     group = "Execution"
     description = "Run Socket Server on port 4000"
     classpath = sourceSets.main.runtimeClasspath
-    main = "org.newrelic.Main"
+    main = "org.testtask.Main"
 }
 
 task runClient(type: JavaExec) {
     group = "Execution"
     description = "Run Client Socket to port 4000"
     classpath = sourceSets.main.runtimeClasspath
-    main = "org.newrelic.ClientApp"
+    main = "org.testtask.ClientApp"
     standardInput = System.in
 }
